@@ -11,11 +11,13 @@ import (
 	flag "github.com/cornfeedhobo/pflag"
 )
 
+// sep formats a number with commas for thousands separators.
 func sep(num int64) string {
 	p := message.NewPrinter(language.English)
 	return p.Sprintf("%d", num)
 }
 
+// PrintPA prints a string with ANSI color codes and padding.
 func PrintPA(str string, pad int, ansi string) {
 	if pad > 0 {
 		fmt.Print(ansi + str + "\033[0m" + strings.Repeat(" ", pad-len(str)))
@@ -24,6 +26,7 @@ func PrintPA(str string, pad int, ansi string) {
 	}
 }
 
+// printFiles prints the details of files in the current directory based on the provided flags.
 func printFiles(dirOnly bool, longMode bool, lastModifiedEnable bool, permsEnable bool, dateFormat string, hlsize, hlmodi, hlperms int) {
 	files, err := os.ReadDir(".")
 	if err != nil {
@@ -92,6 +95,7 @@ func main() {
 	var dirsize int64
 	var dircount int
 
+	// Determine the maximum lengths for size, last modified, and permissions columns for proper alignment.
 	for _, file := range files {
 		fileinfo, err := os.Stat(filepath.Join(".", file.Name()))
 		if err != nil {
@@ -121,6 +125,7 @@ func main() {
 	hlperms++
 
 	if *longMode {
+		// Print headers for the long mode.
 		PrintPA("Size", hlsize, "\033[1;4m")
 		if *lastModifiedEnable {
 			PrintPA("Last Modified", hlmodi, "\033[1;4m")
@@ -132,6 +137,7 @@ func main() {
 		fmt.Println("\033[0m")
 	}
 
+	// Print directories and files based on the specified flags.
 	if *dirFirst {
 		printFiles(true, *longMode, *lastModifiedEnable, *permsEnable, *dateFormat, hlsize, hlmodi, hlperms)
 		printFiles(false, *longMode, *lastModifiedEnable, *permsEnable, *dateFormat, hlsize, hlmodi, hlperms)
@@ -147,5 +153,6 @@ func main() {
 	if !*longMode {
 		fmt.Println()
 	}
+	// Print summary of fetched directories and file sizes.
 	fmt.Println("Fetched \033[36;1m" + sep(dirsize) + "B \033[0mof Files and \033[34;1m" + sep(int64(dircount)) + " \033[0mDirector" + plural + ".")
 }
